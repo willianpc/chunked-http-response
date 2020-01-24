@@ -1,0 +1,27 @@
+<html>
+  <body>
+    <div id="log"></div>
+
+    <script>
+      let loaded = 0;
+      log = document.querySelector('#log');
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', '/chunk');
+      xhr.setRequestHeader('Content-Type', 'text/plain');
+      // xhr.addEventListener('load', ev => {
+      //   const response = ev.target;
+      //   log.innerHTML = response.response + '<br>';
+      // });
+
+      xhr.addEventListener('progress', ev => {
+        const response = ev.target;
+        const chunk = response.response.substr(loaded, ev.loaded);
+        log.innerHTML += chunk + '<br>';
+        loaded = ev.loaded;
+      });
+
+      xhr.send();
+    </script>
+  </body>
+</html>
