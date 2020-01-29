@@ -3,22 +3,49 @@
     <div id="log"></div>
 
     <script>
+
       let loaded = 0;
+      let oldOffset = 0;
       log = document.querySelector('#log');
 
       const xhr = new XMLHttpRequest();
-      xhr.open('GET', '/chunk');
-      xhr.setRequestHeader('Content-Type', 'text/plain');
-      // xhr.addEventListener('load', ev => {
-      //   const response = ev.target;
-      //   log.innerHTML = response.response + '<br>';
-      // });
+      xhr.open('GET', '/chunk?rnd=' + Math.random());
+
+      let buffer = '';
+      let counter = 0;
+      let oldChunk = '';
 
       xhr.addEventListener('progress', ev => {
+        counter += 1;
         const response = ev.target;
-        const chunk = response.response.substr(loaded, ev.loaded);
-        log.innerHTML += chunk + '<br>';
-        loaded = ev.loaded;
+        const responseText = response.responseText;
+        const chunk = buffer + responseText.substr(loaded - buffer.length, responseText.length);
+        oldOffset = loaded;
+        loaded = responseText.length;
+        const jsonStringList = chunk.split(/__LERO__/).filter(item => item !== '');
+
+        for (let i = 0, len = jsonStringList.length - 1; i < len; i++) {
+          let json;
+          try {
+            json = JSON.parse(jsonStringList[i]);
+            console.log(json);
+          } catch(err) {
+            console.log('ERROR DUDE', jsonStringList[i]);
+            console.error(err);
+          }
+        }
+        let json;
+        const lastItem = jsonStringList.slice(-1)[0];
+        try {
+          json = JSON.parse(lastItem);
+          console.log(json);
+        } catch(err) {
+          console.log('ERROR DUDE', lastItem);
+          buffer = lastItem;
+          console.error(err);
+        }
+
+
       });
 
       xhr.send();
